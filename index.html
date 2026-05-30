@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Code Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:    #0f1a10;
+  --ink2:   #2a3d2b;
+  --ink3:   #546e55;
+  --ink4:   #8ea88f;
+  --bg:     #f2ede3;
+  --bg2:    #ece6d9;
+  --card:   #faf8f3;
+  --card2:  #f4f0e6;
+  --line:   rgba(80,100,80,.13);
+  --line2:  rgba(80,100,80,.08);
+  --pine:   #1e3d20;
+  --pine2:  #2a5430;
+  --sage:   #5a8a5c;
+  --mint:   #a8d4aa;
+  --amber:  #c98b3a;
+  --amber2: #e8b060;
+  --me:     #1e3d20;
+  --me-t:   #edf7ee;
+  --r:      14px;
+  --r2:     22px;
+  --ease:   cubic-bezier(.4,0,.2,1);
+  --spring: cubic-bezier(.34,1.4,.64,1);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+
+body {
+  font-family: 'Vazirmatn', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+body.en {
+  font-family: 'Space Grotesk', sans-serif;
+  direction: ltr;
+}
+
+.cs-root {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+.cs-root::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 55% 40% at 5% 0%,  rgba(90,138,92,.18) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 50% at 95% 100%, rgba(201,139,58,.14) 0%, transparent 65%),
+    radial-gradient(ellipse 30% 30% at 50% 50%, rgba(168,212,170,.06) 0%, transparent 80%);
+}
+
+.ov {
+  position: absolute; inset: 0; z-index: 100;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: var(--bg);
+  transition: opacity .55s var(--ease), transform .55s var(--ease);
+}
+.ov::before {
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 40% at 5% 0%,  rgba(90,138,92,.18) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 50% at 95% 100%, rgba(201,139,58,.14) 0%, transparent 65%);
+}
+.ov-out  { opacity: 0; transform: scale(.96); pointer-events: none; }
+.ov-gone { display: none !important; }
+
+.brand { display:flex;flex-direction:column;align-items:center;gap:14px;animation:up .7s ease both;position:relative;z-index:1; }
+.b-ico {
+  width:80px;height:80px;border-radius:26px;
+  background:linear-gradient(135deg,var(--sage),var(--pine));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;
+  color:#fff;letter-spacing:-.5px;
+  box-shadow:0 20px 60px rgba(30,61,32,.3),0 0 0 1px rgba(255,255,255,.15) inset;
+}
+.b-name {
+  font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;
+  color:var(--pine);letter-spacing:2.5px;
+}
+.l-hint { font-size:13px;color:var(--ink3);animation:up .7s ease .1s both;text-align:center;margin-top:4px;position:relative;z-index:1; }
+
+.l-pills { display:flex;gap:16px;margin-top:8px;animation:up .7s ease .2s both;position:relative;z-index:1; }
+.l-pill {
+  width:148px;height:178px;border-radius:28px;
+  background:var(--card);border:1.5px solid var(--line);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;cursor:pointer;
+  box-shadow:0 6px 32px rgba(30,61,32,.1);
+  transition:transform .38s var(--spring),box-shadow .3s var(--ease),border-color .2s;
+  -webkit-tap-highlight-color:transparent;
+}
+.l-pill:hover { transform:translateY(-8px);border-color:rgba(90,138,92,.4);box-shadow:0 20px 60px rgba(30,61,32,.18); }
+.l-pill:active { transform:translateY(-2px) scale(.97); }
+.p-flag { font-size:42px;transition:transform .3s var(--spring); }
+.l-pill:hover .p-flag { transform:scale(1.15) rotate(-4deg); }
+.p-name { font-size:17px;font-weight:700;color:var(--pine); }
+.p-sub  { font-size:11px;color:var(--ink4);font-family:'JetBrains Mono',monospace; }
+
+.i-wrap { text-align:center;position:relative;z-index:1; }
+.i-hi {
+  font-family:'JetBrains Mono',monospace;
+  font-size:clamp(64px,14vw,108px);font-weight:700;
+  color:var(--pine);line-height:1;letter-spacing:-2px;
+  animation:introH 1.1s var(--spring) .2s both;
+}
+.i-sub {
+  font-size:clamp(14px,3vw,20px);color:var(--ink3);
+  font-weight:400;letter-spacing:3px;margin-top:12px;
+  animation:fadeU .9s ease 1s both;
+}
+.i-dots { display:flex;gap:8px;margin-top:48px;animation:fadeU .5s ease 1.8s both;justify-content:center; }
+.id { width:8px;height:8px;border-radius:50%;animation:dp 1.5s ease-in-out infinite; }
+.id:nth-child(1){background:var(--mint);}
+.id:nth-child(2){background:var(--pine);animation-delay:.2s;}
+.id:nth-child(3){background:var(--amber);animation-delay:.4s;}
+
+@keyframes introH { 0%{opacity:0;transform:translateY(40px) scale(.8)} 65%{opacity:1;transform:translateY(-6px) scale(1.02)} 100%{opacity:1;transform:none} }
+@keyframes fadeU  { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none} }
+@keyframes up     { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none} }
+@keyframes dp     { 0%,100%{transform:scale(1);opacity:.35}50%{transform:scale(1.7);opacity:1} }
+@keyframes msgIn  { from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none} }
+@keyframes bob    { 0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)} }
+@keyframes spin   { to{transform:rotate(360deg)} }
+
+#app {
+  position:relative;z-index:1;
+  width:100%;
+  height:100%;
+  height:var(--app-h,100%);
+  display:flex;flex-direction:column;
+  opacity:0;transition:opacity .45s var(--ease);
+}
+#app.show { opacity:1; }
+
+.hdr {
+  flex-shrink:0;height:56px;
+  background:var(--card);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 18px;position:relative;z-index:10;
+}
+.h-logo { display:flex;align-items:center;gap:9px; }
+.h-ico {
+  width:32px;height:32px;border-radius:10px;
+  background:linear-gradient(135deg,var(--sage),var(--pine));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+  color:#fff;box-shadow:0 3px 10px rgba(30,61,32,.28);
+}
+.h-name { font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--pine);letter-spacing:1.5px; }
+.h-lbtn {
+  font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;
+  color:var(--pine);padding:6px 14px;
+  border:1.5px solid var(--line);border-radius:20px;background:var(--card2);
+  cursor:pointer;transition:all .22s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+}
+.h-lbtn:hover { background:var(--pine);color:#fff;border-color:var(--pine); }
+
+.views { flex:1;position:relative;overflow:hidden; }
+.view {
+  position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  transition:opacity .3s var(--ease),transform .3s var(--ease);
+  will-change:transform;
+  background:var(--bg);
+}
+.view::-webkit-scrollbar { width:3px; }
+.view::-webkit-scrollbar-thumb { background:var(--line);border-radius:2px; }
+
+.v-hl { opacity:0;transform:translateX( 50px);pointer-events:none; }
+.v-hr { opacity:0;transform:translateX(-50px);pointer-events:none; }
+body.en .v-hl { transform:translateX(-50px); }
+body.en .v-hr { transform:translateX( 50px); }
+
+.ai-view { display:flex;flex-direction:column;height:100%; }
+
+.qs-bar {
+  flex-shrink:0;padding:9px 14px;display:flex;gap:7px;
+  overflow-x:auto;scrollbar-width:none;
+  background:var(--card);border-bottom:1px solid var(--line);
+}
+.qs-bar::-webkit-scrollbar { display:none; }
+.qq {
+  flex-shrink:0;padding:6px 14px;border-radius:20px;
+  border:1.5px solid var(--line);background:var(--bg2);
+  color:var(--ink2);font-family:inherit;font-size:12px;
+  cursor:pointer;white-space:nowrap;
+  transition:all .2s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+}
+.qq:hover { background:var(--pine);color:#fff;border-color:var(--pine);transform:translateY(-2px); }
+.qq:active { transform:scale(.96); }
+
+.msgs {
+  flex:1;overflow-y:auto;overflow-x:hidden;
+  padding:16px 14px;display:flex;flex-direction:column;gap:10px;
+  scroll-behavior:smooth;
+}
+.msgs::-webkit-scrollbar { width:3px; }
+.msgs::-webkit-scrollbar-thumb { background:var(--line);border-radius:2px; }
+
+.msg { display:flex;flex-direction:column;max-width:80%;animation:msgIn .28s var(--spring) both; }
+.msg.me  { align-self:flex-end; }
+.msg.bot { align-self:flex-start; }
+.mr { display:flex;align-items:flex-end;gap:6px; }
+.msg.me .mr { flex-direction:row-reverse; }
+body.en .msg.me .mr { flex-direction:row-reverse; }
+
+.av {
+  width:28px;height:28px;border-radius:9px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--sage),var(--pine));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;box-shadow:0 2px 8px rgba(30,61,32,.22);
+}
+.bbl {
+  padding:10px 13px;border-radius:16px;
+  font-size:13.5px;line-height:1.78;max-width:100%;
+}
+.msg.bot .bbl {
+  background:var(--card);color:var(--ink);
+  border:1px solid var(--line);
+  border-bottom-right-radius:5px;
+  box-shadow:0 2px 10px rgba(30,61,32,.07);
+}
+.msg.me .bbl {
+  background:var(--me);color:var(--me-t);
+  border-bottom-left-radius:5px;
+  box-shadow:0 4px 16px rgba(30,61,32,.3);
+}
+body.en .msg.bot .bbl { border-bottom-right-radius:16px;border-bottom-left-radius:5px; }
+body.en .msg.me  .bbl { border-bottom-left-radius:16px;border-bottom-right-radius:5px; }
+
+.mt {
+  font-size:10px;color:var(--ink4);margin-top:4px;
+  font-family:'JetBrains Mono',monospace;padding:0 3px;
+}
+.msg.me .mt { text-align:left; }
+body.en .msg.me .mt { text-align:right; }
+
+.code-block {
+  background:rgba(30,61,32,.07);border-radius:8px;
+  padding:9px 11px;margin:7px 0;overflow-x:auto;
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  border:1px solid rgba(30,61,32,.1);
+  display:block;
+}
+.msg.me .code-block { background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.15); }
+.inline-code {
+  background:rgba(30,61,32,.08);padding:1px 5px;border-radius:5px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+}
+.msg.me .inline-code { background:rgba(255,255,255,.18); }
+
+.typing-w {
+  display:flex;gap:5px;align-items:center;padding:11px 14px;
+  background:var(--card);border:1px solid var(--line);
+  border-radius:16px;border-bottom-right-radius:5px;width:fit-content;
+  box-shadow:0 2px 10px rgba(30,61,32,.07);
+}
+body.en .typing-w { border-bottom-right-radius:16px;border-bottom-left-radius:5px; }
+.td { width:6px;height:6px;border-radius:50%;animation:dp 1.4s ease-in-out infinite; }
+.td:nth-child(1){background:var(--mint);}
+.td:nth-child(2){background:var(--pine);animation-delay:.2s;}
+.td:nth-child(3){background:var(--amber);animation-delay:.4s;}
+
+.cbar {
+  flex-shrink:0;padding:9px 12px 11px;
+  background:var(--card);border-top:1px solid var(--line);
+  display:flex;align-items:flex-end;gap:8px;
+}
+.ci-wrap {
+  flex:1;background:var(--bg2);
+  border:1.5px solid var(--line);border-radius:20px;
+  display:flex;align-items:flex-end;padding:8px 13px;
+  transition:border-color .22s,box-shadow .22s;
+}
+.ci-wrap:focus-within { border-color:rgba(90,138,92,.5);box-shadow:0 0 0 3px rgba(90,138,92,.1); }
+.ci {
+  flex:1;border:none;outline:none;background:transparent;resize:none;
+  font-family:inherit;font-size:14px;color:var(--ink);
+  min-height:22px;max-height:96px;line-height:1.5;overflow-y:auto;
+}
+.ci::placeholder { color:var(--ink4); }
+.sbtn {
+  width:40px;height:40px;border-radius:13px;border:none;
+  background:linear-gradient(135deg,var(--sage),var(--pine));
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;flex-shrink:0;
+  box-shadow:0 3px 14px rgba(30,61,32,.3);
+  transition:transform .25s var(--spring),box-shadow .22s;
+  -webkit-tap-highlight-color:transparent;
+}
+.sbtn:hover { transform:scale(1.08);box-shadow:0 6px 20px rgba(30,61,32,.38); }
+.sbtn:active { transform:scale(.92); }
+.sbtn:disabled { opacity:.38;cursor:not-allowed;transform:none;box-shadow:none; }
+.sbtn svg { display:block; }
+.spin-arc { animation:spin 1s linear infinite;transform-origin:center; }
+
+.ch-inner {
+  max-width:680px;margin:0 auto;
+  padding:24px 16px 32px;
+  display:flex;flex-direction:column;gap:18px;
+}
+.ch-hero { text-align:center;padding:16px 0 6px; }
+.ch-em { font-size:52px;display:block;margin-bottom:14px;animation:bob 3s ease-in-out infinite; }
+.ch-title {
+  font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;
+  color:var(--pine);letter-spacing:-1px;
+}
+.ch-sub { font-size:13.5px;color:var(--ink3);margin-top:8px;line-height:1.75;font-weight:300; }
+
+.ch-cards { display:flex;flex-direction:column;gap:13px; }
+
+.cc {
+  background:var(--card);border:1px solid var(--line);
+  border-radius:22px;overflow:hidden;
+  box-shadow:0 4px 24px rgba(30,61,32,.08);
+  transition:transform .35s var(--spring),box-shadow .3s var(--ease);
+  -webkit-tap-highlight-color:transparent;
+}
+.cc:hover { transform:translateY(-5px);box-shadow:0 14px 50px rgba(30,61,32,.15); }
+.cc-top { padding:20px 18px 16px;display:flex;align-items:center;gap:14px; }
+.cc-ico {
+  width:50px;height:50px;border-radius:15px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;box-shadow:0 6px 18px rgba(0,0,0,.1);
+}
+.rub .cc-ico { background:linear-gradient(135deg,#fca94c,#e87c10); }
+.tel .cc-ico { background:linear-gradient(135deg,#42c2ee,#0f90c8); }
+.cc-name { font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--pine); }
+.cc-hndl { font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink4);margin-top:3px;direction:ltr; }
+.cc-plat { font-size:11.5px;color:var(--ink3);margin-top:5px;font-weight:500; }
+.cc-btn {
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  margin:0 18px 18px;padding:12px 16px;border-radius:14px;
+  border:none;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:700;
+  text-decoration:none;color:#fff;
+  transition:transform .25s var(--spring),box-shadow .22s;
+  -webkit-tap-highlight-color:transparent;
+}
+.rub .cc-btn { background:linear-gradient(135deg,#fca94c,#e87c10);box-shadow:0 5px 18px rgba(232,124,16,.3); }
+.tel .cc-btn { background:linear-gradient(135deg,#42c2ee,#0f90c8);box-shadow:0 5px 18px rgba(15,144,200,.3); }
+.rub .cc-btn:hover { transform:scale(1.02);box-shadow:0 8px 28px rgba(232,124,16,.4); }
+.tel .cc-btn:hover { transform:scale(1.02);box-shadow:0 8px 28px rgba(15,144,200,.4); }
+
+.feat {
+  background:var(--card);border:1px solid var(--line);
+  border-radius:22px;overflow:hidden;
+  box-shadow:0 3px 16px rgba(30,61,32,.06);
+}
+.feat-hd {
+  padding:16px 18px 14px;
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;
+  color:var(--pine);letter-spacing:.5px;
+  border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:8px;
+}
+.fi-list { list-style:none; }
+.fi {
+  display:flex;align-items:flex-start;gap:12px;
+  padding:13px 18px;border-bottom:1px solid var(--line2);
+  transition:background .18s;
+}
+.fi:last-child { border-bottom:none; }
+.fi:hover { background:rgba(90,138,92,.05); }
+.fi-ico { font-size:18px;flex-shrink:0;margin-top:1px; }
+.fi-txt { font-size:13px;color:var(--ink2);line-height:1.7; }
+
+.bnav {
+  flex-shrink:0;height:64px;
+  background:var(--card);border-top:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;
+  gap:10px;padding:0 14px 4px;position:relative;z-index:10;
+}
+.bn {
+  flex:1;max-width:190px;height:48px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;border-radius:14px;border:none;background:transparent;
+  cursor:pointer;transition:all .28s var(--spring);
+  -webkit-tap-highlight-color:transparent;
+}
+.bn:hover { background:rgba(90,138,92,.1); }
+.bn.on    { background:var(--pine);box-shadow:0 4px 16px rgba(30,61,32,.3); }
+.bn-ico { font-size:18px;line-height:1;transition:transform .28s var(--spring); }
+.bn:hover .bn-ico { transform:translateY(-2px); }
+.bn.on .bn-ico { transform:scale(1.05); }
+.bn-lbl { font-size:11px;font-weight:600;color:var(--ink3);white-space:nowrap; }
+.bn.on .bn-lbl { color:#fff; }
+
+@media(min-width:540px){
+  .ch-cards { flex-direction:row; }
+  .ch-cards > .cc { flex:1; }
+}
+</style>
+</head>
+<body>
+
+<div class="cs-root" id="root">
+
+  <!-- LANG OVERLAY -->
+  <div class="ov" id="lo">
+    <div class="brand">
+      <div class="b-ico">CS</div>
+      <div class="b-name">Code Studio</div>
+    </div>
+    <div class="l-hint">زبان خود را انتخاب کنید / Choose your language</div>
+    <div class="l-pills">
+      <div class="l-pill" onclick="pickLang('fa')">
+        <div class="p-flag">🇮🇷</div>
+        <div class="p-name">فارسی</div>
+        <div class="p-sub">Persian</div>
+      </div>
+      <div class="l-pill" onclick="pickLang('en')">
+        <div class="p-flag">🇺🇸</div>
+        <div class="p-name">English</div>
+        <div class="p-sub">انگلیسی</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INTRO OVERLAY -->
+  <div class="ov ov-gone" id="io">
+    <div class="i-wrap">
+      <div class="i-hi"  id="i-hi">سلام</div>
+      <div class="i-sub" id="i-sub">خوش آمدید به Code Studio</div>
+      <div class="i-dots">
+        <div class="id"></div>
+        <div class="id"></div>
+        <div class="id"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app" style="display:none">
+
+    <div class="hdr">
+      <div class="h-logo">
+        <div class="h-ico">CS</div>
+        <span class="h-name">Code Studio</span>
+      </div>
+      <button class="h-lbtn" id="lbtn" onclick="toggleLang()">EN</button>
+    </div>
+
+    <div class="views">
+
+      <!-- AI VIEW -->
+      <div class="view ai-view" id="v-ai">
+        <div class="qs-bar" id="qstrip"></div>
+        <div class="msgs"   id="msgs"></div>
+        <div class="cbar">
+          <div class="ci-wrap">
+            <textarea class="ci" id="ci" rows="1"
+              placeholder="سوال برنامه‌نویسی یا تکنولوژی بنویسید..."
+              oninput="grow(this)"
+              onkeydown="onKey(event)"></textarea>
+          </div>
+          <button class="sbtn" id="sbtn" onclick="doSend()">
+            <svg id="send-ico" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+            <svg id="spin-ico" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" style="display:none">
+              <path class="spin-arc" d="M12 2a10 10 0 1 1 0 20"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- CHANNELS VIEW -->
+      <div class="view v-hr" id="v-ch">
+        <div class="ch-inner">
+
+          <div class="ch-hero">
+            <span class="ch-em">📡</span>
+            <div class="ch-title" id="ch-title">کانال‌های ما</div>
+            <div class="ch-sub"   id="ch-sub">در کانال‌های رسمی Code Studio عضو شوید</div>
+          </div>
+
+          <div class="ch-cards">
+            <div class="cc rub">
+              <div class="cc-top">
+                <div class="cc-ico">🟠</div>
+                <div>
+                  <div class="cc-name">Code Studio</div>
+                  <div class="cc-hndl">rubika.ir/Code_Studio</div>
+                  <div class="cc-plat">📱 روبیکا · Rubika</div>
+                </div>
+              </div>
+              <a class="cc-btn" href="https://rubika.ir/Code_Studio" target="_blank" rel="noopener">
+                <span>📱</span>
+                <span id="join-rub">عضویت در روبیکا</span>
+              </a>
+            </div>
+            <div class="cc tel">
+              <div class="cc-top">
+                <div class="cc-ico">✈️</div>
+                <div>
+                  <div class="cc-name">Code Studio</div>
+                  <div class="cc-hndl">t.me/Code_Studio_Original</div>
+                  <div class="cc-plat">✈️ تلگرام · Telegram</div>
+                </div>
+              </div>
+              <a class="cc-btn" href="https://t.me/Code_Studio_Original" target="_blank" rel="noopener">
+                <span>✈️</span>
+                <span id="join-tel">عضویت در تلگرام</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="feat">
+            <div class="feat-hd">✨ <span id="feat-title">محتوای کانال</span></div>
+            <ul class="fi-list" id="feat-list"></ul>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bnav">
+      <button class="bn on" id="bn-ai" onclick="goTab('ai')">
+        <span class="bn-ico">🤖</span>
+        <span class="bn-lbl" id="nav-ai">هوش مصنوعی</span>
+      </button>
+      <button class="bn"     id="bn-ch" onclick="goTab('ch')">
+        <span class="bn-ico">📡</span>
+        <span class="bn-lbl" id="nav-ch">کانال‌ها</span>
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+/* ══ VIEWPORT FIX ══ */
+function setVH(){
+  const h = window.innerHeight;
+  document.documentElement.style.setProperty('--app-h', h + 'px');
+  document.querySelector('.cs-root').style.height = h + 'px';
+}
+setVH();
+window.addEventListener('resize', setVH);
+
+/* ══ COPY ══ */
+const C = {
+  fa: {
+    hi:'سلام', sub:'خوش آمدید به Code Studio',
+    ph:'سوال برنامه‌نویسی یا تکنولوژی بنویسید...',
+    lb:'EN',
+    qs:['Python چیست؟','تفاوت C++ و C#؟','HTML و CSS توضیح بده',
+        'بهترین زبان برای شروع؟','هوش مصنوعی چطور کار می‌کند؟','Assembly چیست؟'],
+    wlc:'سلام! 👋 من دستیار هوش مصنوعی Code Studio هستم.\nهر سوالی درباره تکنولوژی، برنامه‌نویسی یا دنیای IT داری بپرس 🚀',
+    you:'شما', bot:'CS·AI', err:'خطا در اتصال — دوباره تلاش کنید.',
+    navAi:'هوش مصنوعی', navCh:'کانال‌ها',
+    chanTitle:'کانال‌های ما',
+    chanSub:'در کانال‌های رسمی Code Studio عضو شوید',
+    joinRub:'عضویت در روبیکا',
+    joinTel:'عضویت در تلگرام',
+    contentTitle:'محتوای کانال',
+    features:[
+      {icon:'💻', text:'آموزش Assembly، C، C#، C++، HTML & CSS و Python'},
+      {icon:'🌐', text:'اخبار تکنولوژی روز دنیا'},
+      {icon:'🇮🇷', text:'اخبار اینترنت ایران'},
+      {icon:'📝', text:'نمونه کدهای زبان‌های برنامه‌نویسی'},
+      {icon:'🍎', text:'لایوهای مراسم اپل'},
+    ],
+    sys:`تو دستیار هوش مصنوعی تخصصی Code Studio هستی. فقط درباره تکنولوژی، برنامه‌نویسی، علوم کامپیوتر، هوش مصنوعی، اینترنت و موضوعات مرتبط پاسخ می‌دهی. به فارسی روان و ساده پاسخ بده. کدها را داخل بلوک کد بنویس. پاسخ‌ها کامل و آموزنده باشند. سوال خارج از تکنولوژی را مودبانه رد کن.`
+  },
+  en: {
+    hi:'Hello', sub:'Welcome to Code Studio',
+    ph:'Ask your tech or programming question...',
+    lb:'FA',
+    qs:['What is Python?','C++ vs C#?','Explain HTML & CSS',
+        'Best beginner language?','How does AI work?','What is Assembly?'],
+    wlc:"Hello! 👋 I'm Code Studio's AI assistant.\nAsk me anything about tech, programming or the IT world 🚀",
+    you:'You', bot:'CS·AI', err:'Connection error — please try again.',
+    navAi:'AI Assistant', navCh:'Channels',
+    chanTitle:'Our Channels',
+    chanSub:'Join the official Code Studio channels',
+    joinRub:'Join Rubika Channel',
+    joinTel:'Join Telegram Channel',
+    contentTitle:'Channel Content',
+    features:[
+      {icon:'💻', text:'Tutorials: Assembly, C, C#, C++, HTML & CSS and Python'},
+      {icon:'🌐', text:'Latest world technology news'},
+      {icon:'🇮🇷', text:'Iran internet news'},
+      {icon:'📝', text:'Sample code for programming languages'},
+      {icon:'🍎', text:'Apple event live streams'},
+    ],
+    sys:`You are Code Studio's specialized AI assistant. Only answer questions about technology, programming, computer science, AI, the internet, and related topics. Reply clearly in English. Use code blocks for code. Be thorough and educational. Politely decline off-topic questions.`
+  }
+};
+
+/* ══ STATE ══ */
+let lang = 'fa', tab = 'ai', busy = false, hist = [];
+
+/* ══ HELPERS ══ */
+function esc(t){ return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmt(t){
+  t = t.replace(/```(\w*)\n?([\s\S]*?)```/g, (_,l,c) =>
+    `<pre class="code-block"><code>${esc(c.trim())}</code></pre>`);
+  t = t.replace(/`([^`]+)`/g, `<code class="inline-code">$1</code>`);
+  t = t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  t = t.replace(/\n/g,'<br>');
+  return t;
+}
+function timeStr(){
+  return new Date().toLocaleTimeString(lang==='fa'?'fa-IR':'en-US',{hour:'2-digit',minute:'2-digit'});
+}
+
+/* ══════════════════════════════════════════════════════
+   AI ENGINE — Google Gemini (AI Studio)
+   endpoint رسمی Google با CORS آزاد — بدون خطا
+══════════════════════════════════════════════════════ */
+const GEMINI_KEY   = 'AQ.Ab8RN6KL1Ss31CZLTBXwK_3_UdxzFpSQceZsoX3jK_AoJSG7mQ';
+const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_URL   = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_KEY}`;
+
+async function callAI(messages, system) {
+  const contents = messages.map(m => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }]
+  }));
+
+  const body = {
+    system_instruction: { parts: [{ text: system }] },
+    contents: contents,
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 1024
+    }
+  };
+
+  const r = await fetch(GEMINI_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  if (!r.ok) {
+    const errData = await r.json().catch(() => ({}));
+    throw new Error(errData?.error?.message || 'Gemini API error: ' + r.status);
+  }
+
+  const data = await r.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text || text.trim().length < 2) throw new Error('empty response');
+  return text.trim();
+}
+
+/* ══ LANG PICK ══ */
+function pickLang(l){
+  lang = l;
+  try { localStorage.setItem('cs-lang', l); } catch {}
+  applyDir();
+
+  const lo = document.getElementById('lo');
+  lo.classList.add('ov-out');
+  setTimeout(()=>{ lo.classList.add('ov-gone'); }, 580);
+
+  const io = document.getElementById('io');
+  io.classList.remove('ov-gone');
+  document.getElementById('i-hi').textContent  = C[lang].hi;
+  document.getElementById('i-sub').textContent = C[lang].sub;
+  ['i-hi','i-sub'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.style.animation = 'none';
+    void el.offsetWidth;
+    el.style.animation = '';
+  });
+
+  setTimeout(launch, 3900);
+}
+
+function launch(){
+  const io = document.getElementById('io');
+  io.classList.add('ov-out');
+  setTimeout(()=>{ io.classList.add('ov-gone'); }, 580);
+
+  const app = document.getElementById('app');
+  app.style.display = 'flex';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>app.classList.add('show')));
+
+  applyLang();
+  buildQs();
+  seedWelcome();
+}
+
+/* ══ DIR / LANG ══ */
+function applyDir(){
+  const en = lang === 'en';
+  document.documentElement.lang = lang;
+  document.documentElement.dir  = en ? 'ltr' : 'rtl';
+  document.body.classList.toggle('en', en);
+}
+function applyLang(){
+  applyDir();
+  document.getElementById('lbtn').textContent       = C[lang].lb;
+  document.getElementById('ci').placeholder         = C[lang].ph;
+  document.getElementById('nav-ai').textContent     = C[lang].navAi;
+  document.getElementById('nav-ch').textContent     = C[lang].navCh;
+  document.getElementById('ch-title').textContent   = C[lang].chanTitle;
+  document.getElementById('ch-sub').textContent     = C[lang].chanSub;
+  document.getElementById('join-rub').textContent   = C[lang].joinRub;
+  document.getElementById('join-tel').textContent   = C[lang].joinTel;
+  document.getElementById('feat-title').textContent = C[lang].contentTitle;
+  buildFeatures();
+}
+function toggleLang(){
+  lang = lang === 'fa' ? 'en' : 'fa';
+  try { localStorage.setItem('cs-lang', lang); } catch {}
+  applyLang();
+  buildQs();
+  seedWelcome();
+}
+
+/* ══ FEATURES ══ */
+function buildFeatures(){
+  const ul = document.getElementById('feat-list');
+  ul.innerHTML = '';
+  C[lang].features.forEach(f=>{
+    const li = document.createElement('li');
+    li.className = 'fi';
+    li.innerHTML = `<span class="fi-ico">${f.icon}</span><span class="fi-txt">${f.text}</span>`;
+    ul.appendChild(li);
+  });
+}
+
+/* ══ TABS ══ */
+function goTab(t){
+  if(t === tab) return;
+  tab = t;
+  const ai  = document.getElementById('v-ai');
+  const ch  = document.getElementById('v-ch');
+  const en  = lang === 'en';
+  if(t === 'ch'){
+    ai.classList.add(en ? 'v-hr' : 'v-hl');
+    ch.classList.remove('v-hl','v-hr');
+  } else {
+    ch.classList.add(en ? 'v-hl' : 'v-hr');
+    ai.classList.remove('v-hl','v-hr');
+  }
+  document.getElementById('bn-ai').classList.toggle('on', t==='ai');
+  document.getElementById('bn-ch').classList.toggle('on', t==='ch');
+}
+
+/* ══ QUICK Qs ══ */
+function buildQs(){
+  const strip = document.getElementById('qstrip');
+  strip.innerHTML = '';
+  C[lang].qs.forEach(q=>{
+    const btn = document.createElement('button');
+    btn.className = 'qq';
+    btn.textContent = q;
+    btn.onclick = ()=> sendText(q);
+    strip.appendChild(btn);
+  });
+}
+
+/* ══ CHAT ══ */
+function seedWelcome(){
+  const area = document.getElementById('msgs');
+  area.innerHTML = '';
+  hist = [];
+  addMsg(C[lang].wlc, 'bot');
+}
+
+function addMsg(text, role){
+  const area = document.getElementById('msgs');
+  const div  = document.createElement('div');
+  div.className = `msg ${role}`;
+  const t = timeStr();
+  if(role === 'bot'){
+    div.innerHTML = `
+      <div class="mr">
+        <div class="av">🤖</div>
+        <div class="bbl">${fmt(text)}</div>
+      </div>
+      <div class="mt">${C[lang].bot} · ${t}</div>`;
+  } else {
+    div.innerHTML = `
+      <div class="mr">
+        <div class="bbl">${esc(text)}</div>
+      </div>
+      <div class="mt">${C[lang].you} · ${t}</div>`;
+  }
+  area.appendChild(div);
+  area.scrollTo({top:area.scrollHeight, behavior:'smooth'});
+}
+
+function showTyping(){
+  const area = document.getElementById('msgs');
+  const d    = document.createElement('div');
+  d.className = 'msg bot'; d.id = 'tnode';
+  d.innerHTML = `
+    <div class="mr">
+      <div class="av">🤖</div>
+      <div class="typing-w">
+        <div class="td"></div><div class="td"></div><div class="td"></div>
+      </div>
+    </div>`;
+  area.appendChild(d);
+  area.scrollTo({top:area.scrollHeight, behavior:'smooth'});
+}
+function rmTyping(){ const e=document.getElementById('tnode'); if(e) e.remove(); }
+
+/* ══ SEND ══ */
+function doSend(){
+  const ci  = document.getElementById('ci');
+  const txt = ci.value.trim();
+  if(!txt || busy) return;
+  ci.value = ''; ci.style.height = 'auto';
+  sendText(txt);
+}
+
+async function sendText(txt){
+  if(busy) return;
+  if(tab !== 'ai') goTab('ai');
+
+  addMsg(txt, 'me');
+  hist.push({role:'user', content:txt});
+  showTyping();
+  setBusy(true);
+
+  try {
+    const reply = await callAI(hist.slice(-12), C[lang].sys);
+    rmTyping();
+    hist.push({role:'assistant', content:reply});
+    addMsg(reply, 'bot');
+  } catch(e) {
+    rmTyping();
+    addMsg(C[lang].err, 'bot');
+    console.error('AI Error:', e);
+  } finally {
+    setBusy(false);
+  }
+}
+
+function setBusy(v){
+  busy = v;
+  document.getElementById('sbtn').disabled = v;
+  document.getElementById('send-ico').style.display = v ? 'none'  : 'block';
+  document.getElementById('spin-ico').style.display = v ? 'block' : 'none';
+}
+
+function onKey(e){ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); doSend(); } }
+function grow(el){ el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,96)+'px'; }
+
+/* ══ بررسی زبان ذخیره‌شده ══ */
+(function checkSavedLang(){
+  let saved = null;
+  try { saved = localStorage.getItem('cs-lang'); } catch {}
+  if (saved === 'fa' || saved === 'en') {
+    lang = saved;
+    applyDir();
+    document.getElementById('lo').classList.add('ov-gone');
+    const io = document.getElementById('io');
+    io.classList.remove('ov-gone');
+    document.getElementById('i-hi').textContent  = C[lang].hi;
+    document.getElementById('i-sub').textContent = C[lang].sub;
+    setTimeout(launch, 3900);
+  }
+})();
+</script>
+</body>
+</html>
